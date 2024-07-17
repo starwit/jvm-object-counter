@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60">
+	<Properties>
+	    <Property name="pattern">[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</Property>
+	</Properties>
+  <Appenders>
+     <Console name="ConsoleAppender" target="SYSTEM_OUT">
+        <PatternLayout>
+            <Pattern>${pattern}</Pattern>
+        </PatternLayout>
+    </Console>
+  </Appenders>
+  
+  <Loggers>
+    <Logger name="org.apache.test" level="trace" additivity="false">
+        <AppenderRef ref="ConsoleAppender"/>
+    </Logger>
+    <Root level="debug">
+        <AppenderRef ref="ConsoleAppender"/>
+    </Root>
+  </Loggers>
+</Configuration>
