@@ -1,6 +1,6 @@
 package de.starwit;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -24,6 +24,7 @@ public class AppTest {
                         app.parseHistogram(histogram);
             }
         }
-        assertTrue(true);
+
+        assertEquals(983L, (long) app.getCollectedStats().keySet().size());
     }
 }
