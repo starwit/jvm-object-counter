@@ -2,6 +2,11 @@ package de.starwit;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -30,7 +35,9 @@ public class App {
     private JMXConnector jmxc;
     private MBeanServerConnection mbsc;
 
-    private String remoteJVMUrl = "service:jmx:rmi:///jndi/rmi://localhost:5433/jmxrmi";
+    private String remoteJVMUrl = "service:jmx:rmi:///jndi/rmi://192.168.100.14:5433/jmxrmi";
+
+    HashMap<String, List<ObjectStats>> collectedStats = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
         App a = new App();
@@ -81,6 +88,42 @@ public class App {
         }
     }
 
+    public void parseHistogram(String histogram) {
+
+        // Split the data into lines
+        String[] lines = histogram.strip().split("\n");
+
+        Date now = new Date();
+
+        // Parse each line and extract the relevant information
+        for (int i = 2; i < lines.length-1; i++) {
+            String line = lines[i].strip();
+
+            String[] parts = line.split("\\s+");
+            int instances = Integer.parseInt(parts[1]);
+            String bytes = parts[2];
+            String className = parts[3];
+            if (parts.length == 5) {
+                className += " " + parts[4];   
+            }
+
+            if(instances >= 10) {
+                HashMap<String, ObjectStats> heapObjectCount = new HashMap<>();
+                ObjectStats os = new ObjectStats();
+                os.setCount(instances);
+                os.setBytes(Integer.parseInt(bytes));
+                os.setMeasurementTime(now);
+                heapObjectCount.put(className, os);
+                if (collectedStats.get(className) == null) {
+                    collectedStats.put(className, new ArrayList<>());
+                }
+                collectedStats.get(className).add(os);
+            }
+        }
+        
+        printMeasurement();
+    }
+
     public void printAllMbeans(MBeanServerConnection mbsc) throws Exception {
         Set<ObjectInstance> mbeans = mbsc.queryMBeans(null, null);
         for (ObjectInstance ob : mbeans) {
@@ -105,5 +148,16 @@ public class App {
             log.error("Can't close connection to remote JVM " + e.getMessage());
             System.exit(1);
         }
+    }
+
+    private void printMeasurement() {
+        for (String objectName: collectedStats.keySet()) {
+            List<ObjectStats> stats = collectedStats.get(objectName);
+            System.out.println(objectName);
+            for (ObjectStats objectStats : stats) {
+                System.out.println(objectStats);
+            }
+        }
+        System.out.println(collectedStats.keySet().size());
     }
 }
