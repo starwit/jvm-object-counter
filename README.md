@@ -12,7 +12,7 @@ This app uses Maven to build and package. Run following commands in repo's base 
 TODO
 
 ## How to configure
-TODO
+If application detects application.properties file in same directory, this will loaded and overrides any internal config. Shipped property file can be found [here](src/main/resources/application.properties).
 
 # License
 This software is published under Apache 2.0 license and file with license agreement can be found [here](LICENSE). 
