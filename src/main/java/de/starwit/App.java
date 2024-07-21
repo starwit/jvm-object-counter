@@ -58,18 +58,8 @@ public class App {
     }
 
     App() {
-        try (InputStream in = App.class.getClassLoader().getResourceAsStream("application.properties")) {
-            if(in != null) {
-                config.load(in);
-                remoteJVMUrl = config.getProperty("remotejvm.url");
-            } else {
-                log.error("Can't find property file");
-                System.exit(1);
-            }
-        } catch (IOException e) {
-            log.error("Can't load property file, exiting " + e.getMessage());
-            System.exit(1); // exit with error status
-        }
+        config = LoadConfig.loadProperties();
+        remoteJVMUrl = config.getProperty("remotejvm.url");
         db = new EmbeddedDB();
         if(!db.startHSQLDB(config)) {
             log.error("Can't start embedded DB, exiting");
