@@ -2,11 +2,10 @@ package de.starwit;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -28,9 +27,13 @@ import javax.management.remote.JMXServiceURL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.starwit.persistence.EmbeddedDB;
+
 public class App {
 
     static Logger log = LogManager.getLogger(App.class.getName());
+
+    private EmbeddedDB db;
 
     private Properties config = new Properties();
     private JMXConnector jmxc;
@@ -39,26 +42,16 @@ public class App {
     private String remoteJVMUrl = "service:jmx:rmi:///jndi/rmi://192.168.100.14:5433/jmxrmi";
 
     HashMap<String, List<ObjectStats>> collectedStats = new HashMap<>();
-    public HashMap<String, List<ObjectStats>> getCollectedStats() {
-        return collectedStats;
-    }
 
     boolean isRunning = true;
 
     public static void main(String[] args) throws Exception {
         App a = new App();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(){
-            public void run() {
-                try {
-                    Thread.sleep(100);
-                    log.info("Shutting down measurement");
-                    a.shutdown();
-                } catch (InterruptedException e) {
-                    log.error("Can't shutdown properly " + e.getMessage());
-                }
-            }
-        });        
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Shutting down measurement");
+            a.shutdown();
+        }));
 
         a.setup();
         a.collectObjectCount();
@@ -77,6 +70,11 @@ public class App {
             log.error("Can't load property file, exiting " + e.getMessage());
             System.exit(1); // exit with error status
         }
+        db = new EmbeddedDB();
+        if(!db.startHSQLDB(config)) {
+            log.error("Can't start embedded DB, exiting");
+            System.exit(2);
+        }
     }
 
     public void setup() {
@@ -85,7 +83,7 @@ public class App {
             jmxc = JMXConnectorFactory.connect(url, null);
             mbsc = jmxc.getMBeanServerConnection();
         } catch (Exception e) {
-            log.error("can't make connection to remote JVM " + e.getMessage());
+            log.error("can't make connection to remote JVM " + remoteJVMUrl + " " + e.getMessage());
             System.exit(1);
         }
 
@@ -120,8 +118,9 @@ public class App {
     public void parseHistogram(String histogram) {
         // Split the data into lines
         String[] lines = histogram.strip().split("\n");
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         int amountCollectedClasses = 0;
+        List<ObjectStats> stats = new ArrayList<>();
         // Parse each line and extract the relevant information
         for (int i = 2; i < lines.length-1; i++) {
             String line = lines[i].strip();
@@ -136,6 +135,7 @@ public class App {
 
             if(instances >= 10) {
                 ObjectStats os = new ObjectStats();
+                os.setClassIdentifier(className);
                 os.setCount(instances);
                 os.setBytes(Integer.parseInt(bytes));
                 os.setMeasurementTime(now);
@@ -144,9 +144,11 @@ public class App {
                 }
                 collectedStats.get(className).add(os);
                 amountCollectedClasses++;
+                stats.add(os);
             }
         }
         log.info("added object count for " + amountCollectedClasses + " classes");
+        db.insertMeasurementData(stats);
         if(Boolean.parseBoolean(config.getProperty("instrumenting.printAll"))) {
             printMeasurement();
         }        
@@ -177,10 +179,15 @@ public class App {
         log.info("Captured SIGTERM, shutting down");
         isRunning = false;
         try {
-            jmxc.close();
+            if(jmxc != null) {
+                jmxc.close();
+            }
         } catch (IOException e) {
             log.error("Can't close connection to remote JVM " + e.getMessage());
             System.exit(1);
+        }
+        if(db != null) {
+            db.stop();
         }
     }
 
@@ -193,4 +200,8 @@ public class App {
             }
         }
     }
+
+    public HashMap<String, List<ObjectStats>> getCollectedStats() {
+        return collectedStats;
+    }    
 }

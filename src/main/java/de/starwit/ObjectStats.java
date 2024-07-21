@@ -1,17 +1,26 @@
 package de.starwit;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class ObjectStats {
+    String classIdentifier;
     int count;
     int bytes;
-    Date measurementTime;
+    LocalDateTime measurementTime;
 
-    public Date getMeasurementTime() {
+    public String getClassIdentifier() {
+        return classIdentifier;
+    }
+
+    public void setClassIdentifier(String classIdentifier) {
+        this.classIdentifier = classIdentifier;
+    }    
+
+    public LocalDateTime getMeasurementTime() {
         return measurementTime;
     }
 
-    public void setMeasurementTime(Date measurementTime) {
+    public void setMeasurementTime(LocalDateTime measurementTime) {
         this.measurementTime = measurementTime;
     }
 
@@ -33,6 +42,7 @@ public class ObjectStats {
 
     @Override
     public String toString() {
-        return "ObjectStats [measurementTime=" + measurementTime + ", count=" + count + ", bytes=" + bytes + "]";
+        return "ObjectStats [classIdentifier=" + classIdentifier + ", count=" + count + ", bytes=" + bytes
+                + ", measurementTime=" + measurementTime + "]";
     }
 }
