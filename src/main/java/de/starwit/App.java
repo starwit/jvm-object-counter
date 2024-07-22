@@ -40,6 +40,7 @@ public class App {
     private MBeanServerConnection mbsc;
 
     private String remoteJVMUrl = "service:jmx:rmi:///jndi/rmi://192.168.100.14:5433/jmxrmi";
+    private int minimumObjectCount = 10;
 
     HashMap<String, List<ObjectStats>> collectedStats = new HashMap<>();
 
@@ -60,6 +61,12 @@ public class App {
     App() {
         config = LoadConfig.loadProperties();
         remoteJVMUrl = config.getProperty("remotejvm.url");
+        try {
+            minimumObjectCount = Integer.parseInt(config.getProperty("instrumenting.minimumObjectCount"));    
+        } catch (NumberFormatException e) {
+            log.info("Can't read minimum object count from app props, using default value " + minimumObjectCount);
+        }
+        
         db = new EmbeddedDB();
         if(!db.startHSQLDB(config)) {
             log.error("Can't start embedded DB, exiting");
@@ -123,7 +130,7 @@ public class App {
                 className += " " + parts[4];   
             }
 
-            if(instances >= 10) {
+            if(instances >= minimumObjectCount) {
                 ObjectStats os = new ObjectStats();
                 os.setClassIdentifier(className);
                 os.setCount(instances);

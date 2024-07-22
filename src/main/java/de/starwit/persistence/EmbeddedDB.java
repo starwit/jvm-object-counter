@@ -31,7 +31,7 @@ public class EmbeddedDB {
 
     public boolean startHSQLDB(Properties config) {
         HsqlProperties props = new HsqlProperties();
-        props.setProperty("server.database.0", "file:gclogs;hsqldb.lock_file=false");
+        props.setProperty("server.database.0", "file:gclogs;hsqldb.lock_file=false;hsqldb.default_table_type=cached;hsqldb.script_format=3");
         props.setProperty("server.dbname.0", "gclogs");
         props.setProperty("server.port", "9001");
 
