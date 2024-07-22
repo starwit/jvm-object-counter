@@ -126,13 +126,13 @@ public class App {
 
     public void parseHistogram(String histogram) {
         // Split the data into lines
-        String[] lines = histogram.strip().split("\n");
+        String[] lines = histogram.trim().split("\n");
         LocalDateTime now = LocalDateTime.now();
         int amountCollectedClasses = 0;
         List<ObjectStats> stats = new ArrayList<>();
         // Parse each line and extract the relevant information
         for (int i = 2; i < lines.length-1; i++) {
-            String line = lines[i].strip();
+            String line = lines[i].trim();
 
             String[] parts = line.split("\\s+");
             int instances = Integer.parseInt(parts[1]);

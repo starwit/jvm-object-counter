@@ -111,21 +111,19 @@ public class EmbeddedDB {
 
     private boolean createTables() {
         boolean result = false;
-        String createStatement = """
-                CREATE TABLE gclogsclassid (
-                    id INTEGER IDENTITY PRIMARY KEY,
-                    identifier VARCHAR(255) NOT NULL
-                );
+        String createStatement = "CREATE TABLE gclogsclassid (\n" +
+                    "id INTEGER IDENTITY PRIMARY KEY,\n" +
+                    "identifier VARCHAR(255) NOT NULL\n" +
+                ");\n" +
 
-                CREATE TABLE gclogscount (
-                    id INTEGER IDENTITY PRIMARY KEY,
-                    count INT NOT NULL,
-                    memsize INT NOT NULL,
-                    measuretime TIMESTAMP,
-                    classid INT,
-                    FOREIGN KEY (classid) REFERENCES gclogsclassid(id)
-                );
-           """;
+                "CREATE TABLE gclogscount (\n" +
+                    "id INTEGER IDENTITY PRIMARY KEY,\n" +
+                    "count INT NOT NULL,\n" +
+                    "memsize INT NOT NULL,\n" +
+                    "measuretime TIMESTAMP,\n" +
+                    "classid INT,\n" +
+                    "FOREIGN KEY (classid) REFERENCES gclogsclassid(id) \n" +
+                ");";
         try {
             Statement stmt = conn.createStatement();
             stmt.executeUpdate(createStatement);
