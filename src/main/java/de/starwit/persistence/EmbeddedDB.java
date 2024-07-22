@@ -26,12 +26,26 @@ public class EmbeddedDB {
 
     Connection conn;
     Server server;
+    boolean isDefaultPw = false;
+    Properties config;
 
     HashMap<String, Integer> classIdentifiersSoFar = new HashMap<>();
 
     public boolean startHSQLDB(Properties config) {
+        this.config = config;
+
+        String credentials = ";user=gclogs;password=";
+        String p = config.getProperty("storage.hsqldb.pw");
+        if(p != null & !p.isEmpty()) {
+            credentials += config.getProperty("storage.hsqldb.pw");
+        } else {
+            log.error("Can't read password from config - using default");
+            credentials += "gclogs";
+            isDefaultPw = true;
+        }
+        
         HsqlProperties props = new HsqlProperties();
-        props.setProperty("server.database.0", "file:gclogs;hsqldb.lock_file=false;hsqldb.default_table_type=cached;hsqldb.script_format=3");
+        props.setProperty("server.database.0", "file:gclogs;hsqldb.lock_file=false;hsqldb.default_table_type=cached;hsqldb.script_format=3" + credentials);
         props.setProperty("server.dbname.0", "gclogs");
         props.setProperty("server.port", "9001");
 
@@ -56,7 +70,12 @@ public class EmbeddedDB {
         String url="jdbc:hsqldb:hsql://localhost:9001/gclogs";
         try {
             Class.forName("org.hsqldb.jdbc.JDBCDriver");
-            conn = DriverManager.getConnection(url, "SA", "");
+            if(isDefaultPw) {
+                conn = DriverManager.getConnection(url, "gclogs", "gclogs");
+            } else {
+                conn = DriverManager.getConnection(url, "gclogs", config.getProperty("storage.hsqldb.pw"));
+            }
+            
             result = true;
         } catch (ClassNotFoundException e) {
             log.error("Can't load driver for HSQLDB " + e.getMessage());

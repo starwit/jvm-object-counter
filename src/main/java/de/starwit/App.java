@@ -42,6 +42,7 @@ public class App {
     private String remoteJVMUrl = "service:jmx:rmi:///jndi/rmi://192.168.100.14:5433/jmxrmi";
     private int minimumObjectCount = 10;
     private int minimumObjectMemsize = 1024;
+    private int sampleTime = 1000;
 
     HashMap<String, List<ObjectStats>> collectedStats = new HashMap<>();
 
@@ -71,8 +72,13 @@ public class App {
             minimumObjectMemsize = Integer.parseInt(config.getProperty("instrumenting.minimumObjectSize"));    
         } catch (NumberFormatException e) {
             log.info("Can't read minimum object count from app props, using default value " + minimumObjectMemsize);
+        }    
+        try {
+            sampleTime = Integer.parseInt(config.getProperty("instrumenting.sampleTime"));    
+        } catch (NumberFormatException e) {
+            log.info("Can't read minimum object count from app props, using default value " + sampleTime);
         }        
-        
+
         db = new EmbeddedDB();
         if(!db.startHSQLDB(config)) {
             log.error("Can't start embedded DB, exiting");
@@ -110,7 +116,7 @@ public class App {
                 log.error("Can't invoke DiagnosticCommand MBean " + e.getMessage());
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(sampleTime);
             } catch (InterruptedException e) {
                 log.error("Can't sleep properly " + e.getMessage());
                 shutdown();
