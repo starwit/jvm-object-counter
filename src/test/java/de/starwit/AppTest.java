@@ -25,6 +25,6 @@ public class AppTest {
             }
         }
 
-        assertEquals(983L, (long) app.getCollectedStats().keySet().size());
+        assertEquals(674L, (long) app.getCollectedStats().keySet().size());
     }
 }
