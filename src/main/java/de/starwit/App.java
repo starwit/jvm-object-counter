@@ -41,6 +41,7 @@ public class App {
 
     private String remoteJVMUrl = "service:jmx:rmi:///jndi/rmi://192.168.100.14:5433/jmxrmi";
     private int minimumObjectCount = 10;
+    private int minimumObjectMemsize = 1024;
 
     HashMap<String, List<ObjectStats>> collectedStats = new HashMap<>();
 
@@ -66,6 +67,11 @@ public class App {
         } catch (NumberFormatException e) {
             log.info("Can't read minimum object count from app props, using default value " + minimumObjectCount);
         }
+        try {
+            minimumObjectMemsize = Integer.parseInt(config.getProperty("instrumenting.minimumObjectSize"));    
+        } catch (NumberFormatException e) {
+            log.info("Can't read minimum object count from app props, using default value " + minimumObjectMemsize);
+        }        
         
         db = new EmbeddedDB();
         if(!db.startHSQLDB(config)) {
@@ -124,17 +130,17 @@ public class App {
 
             String[] parts = line.split("\\s+");
             int instances = Integer.parseInt(parts[1]);
-            String bytes = parts[2];
+            int bytes = Integer.parseInt(parts[2]);
             String className = parts[3];
             if (parts.length == 5) {
                 className += " " + parts[4];   
             }
 
-            if(instances >= minimumObjectCount) {
+            if(instances >= minimumObjectCount & bytes > minimumObjectMemsize) {
                 ObjectStats os = new ObjectStats();
                 os.setClassIdentifier(className);
                 os.setCount(instances);
-                os.setBytes(Integer.parseInt(bytes));
+                os.setBytes(bytes);
                 os.setMeasurementTime(now);
                 if (collectedStats.get(className) == null) {
                     collectedStats.put(className, new ArrayList<>());
