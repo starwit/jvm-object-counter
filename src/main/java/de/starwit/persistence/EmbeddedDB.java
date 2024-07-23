@@ -24,10 +24,10 @@ import de.starwit.ObjectStats;
 public class EmbeddedDB {
     static Logger log = LogManager.getLogger(EmbeddedDB.class.getName());
 
-    Connection conn;
     Server server;
-    boolean isDefaultPw = false;
+    Connection conn;
     Properties config;
+    boolean isDefaultPw = false;
 
     HashMap<String, Integer> classIdentifiersSoFar = new HashMap<>();
 
@@ -214,4 +214,8 @@ public class EmbeddedDB {
             server.stop();
         }
     }
+
+    public Connection getConn() {
+        return conn;
+    }    
 }
