@@ -1,5 +1,6 @@
 package de.starwit.persistence;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -43,9 +44,12 @@ public class EmbeddedDB {
             credentials += "gclogs";
             isDefaultPw = true;
         }
+
+        String dbLocation = config.getProperty("storage.hsqldb.path");
+        dbLocation += File.separator;
         
         HsqlProperties props = new HsqlProperties();
-        props.setProperty("server.database.0", "file:gclogs;hsqldb.lock_file=false;hsqldb.default_table_type=cached;hsqldb.script_format=3" + credentials);
+        props.setProperty("server.database.0", "file:" + dbLocation + "gclogs;hsqldb.lock_file=false;hsqldb.default_table_type=cached;hsqldb.script_format=3" + credentials);
         props.setProperty("server.dbname.0", "gclogs");
         props.setProperty("server.port", "9001");
 
