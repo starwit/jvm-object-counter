@@ -36,5 +36,8 @@ If application detects application.properties file in same directory, this will 
     instrumenting.printAll=false
 ```
 
+## How to analyze
+
+
 # License
 This software is published under Apache 2.0 license and file with license agreement can be found [here](LICENSE). 
