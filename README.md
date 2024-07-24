@@ -17,7 +17,7 @@ This app uses Maven to build and package. Run following commands in repo's base 
 Simply run jar file with Java (version >= 21). App will start an embedded HSQLDB to which you can connect on port 9001, credentials can be set via application properties - see next section. Collected data can be analyzed from HSQLDB using other tools.
 
 ## How to configure
-If application detects application.properties file in same directory, this will loaded and overrides any internal config. Shipped property file can be found [here](src/main/resources/application.properties).
+If application detects application.properties file in same directory, this will be loaded and overrides any internal config. Shipped property file can be found [here](src/main/resources/application.properties).
 ```properties
     remotejvm.url=service:jmx:rmi:///jndi/rmi://host:port/jmxrmi
     remotejvm.enableAuth=false
@@ -25,6 +25,7 @@ If application detects application.properties file in same directory, this will 
     remotejvm.password=
 
     storage.hsqldb.pw=agoodpassword
+    storage.hsqldb.path=
 
     # be careful - lower is faster. milliseconds
     instrumenting.sampleTime=1000
@@ -34,6 +35,9 @@ If application detects application.properties file in same directory, this will 
     instrumenting.printObjectCount=true
     instrumenting.printAll=false
 ```
+
+## How to analyze
+
 
 # License
 This software is published under Apache 2.0 license and file with license agreement can be found [here](LICENSE). 
