@@ -6,6 +6,8 @@ In Java software at times too many objects or too large objects are created. If 
 
 Data source is object histogram that is offered from MBean DiagnosticCommand via JMX. For more details see [JavaDoc] (https://docs.oracle.com/javase/8/docs/jre/api/management/extension/com/sun/management/DiagnosticCommandMBean.html)
 
+__Note__ Operation _gcClassHistogram_ appears to cause full GC. If that's the case, this will slow down your app significantly.
+
 ## How to build
 This app uses Maven to build and package. Run following commands in repo's base folder.
 ```bash
@@ -28,16 +30,25 @@ If application detects application.properties file in same directory, this will 
     storage.hsqldb.path=
 
     # be careful - lower is faster. milliseconds
-    instrumenting.sampleTime=1000
+    instrumenting.sampleTime=5000
+    instrumenting.collectObjects=false
     instrumenting.minimumObjectCount=1
     instrumenting.minimumObjectSize=1024
     instrumenting.printAllMBeans=false
     instrumenting.printObjectCount=true
     instrumenting.printAll=false
+    instrumenting.collectThreads=true
+    instrumenting.threadOutputFile=threadlog.csv
 ```
 
 ## How to analyze
+If you run tool, you'll end up with a HSQL database, that you can use for further analysis. Just start HSQLDB like so:
+```bash
+    java -cp ./hsqldb.jar org.hsqldb.Server --database.0 file:path/gclogs --dbname.0 gclogs
+```
+Necessary jar can be downloaded on HSQLDB's web page: https://hsqldb.org/
 
+Project also has a tool, that extracts database into a flat CSV file. This can then be used with tools like Python/Pandas for further analysis. TODO more details on that.
 
 # License
 This software is published under Apache 2.0 license and file with license agreement can be found [here](LICENSE). 
